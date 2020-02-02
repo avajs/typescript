@@ -34,5 +34,10 @@
       "lcov",
       "text"
     ]
+  },
+  "xo": {
+    "rules": {
+      "import/order": "off"
+    }
   }
 }
