@@ -24,7 +24,7 @@ function isValidRewritePaths(rewritePaths) {
 }
 
 module.exports = ({negotiateProtocol}) => {
-	const protocol = negotiateProtocol(['ava-3'], {version: pkg.version});
+	const protocol = negotiateProtocol(['ava-3.2', 'ava-3'], {version: pkg.version});
 	if (protocol === null) {
 		return;
 	}
@@ -47,22 +47,62 @@ module.exports = ({negotiateProtocol}) => {
 
 			const {
 				extensions = ['ts'],
-				rewritePaths
+				rewritePaths: relativeRewritePaths
 			} = config;
+
+			const rewritePaths = Object.entries(relativeRewritePaths).map(([from, to]) => [
+				path.join(protocol.projectDir, from),
+				path.join(protocol.projectDir, to)
+			]);
+			const testFileExtension = new RegExp(`\\.(${extensions.map(ext => escapeStringRegexp(ext)).join('|')})$`);
 
 			return {
 				async compile() {
 					return {
 						extensions: extensions.slice(),
-						rewritePaths: Object.entries(rewritePaths).map(([from, to]) => [
-							path.join(protocol.projectDir, from),
-							path.join(protocol.projectDir, to)
-						])
+						rewritePaths: rewritePaths.slice()
 					};
 				},
 
 				get extensions() {
 					return extensions.slice();
+				},
+
+				ignoreChange(filePath) {
+					if (!testFileExtension.test(filePath)) {
+						return false;
+					}
+
+					return rewritePaths.some(([from]) => filePath.startsWith(from));
+				},
+
+				resolveTestFile(testfile) {
+					if (!testFileExtension.test(testfile)) {
+						return testfile;
+					}
+
+					const rewrite = rewritePaths.find(([from]) => testfile.startsWith(from));
+					if (rewrite === undefined) {
+						return testfile;
+					}
+
+					const [from, to] = rewrite;
+					// TODO: Support JSX preserve mode — https://www.typescriptlang.org/docs/handbook/jsx.html
+					return `${to}${testfile.slice(from.length)}`.replace(testFileExtension, '.js');
+				},
+
+				updateGlobs({filePatterns, ignoredByWatcherPatterns}) {
+					return {
+						filePatterns: [
+							...filePatterns,
+							'!**/*.d.ts',
+							...Object.values(relativeRewritePaths).map(to => `!${to}**`)
+						],
+						ignoredByWatcherPatterns: [
+							...ignoredByWatcherPatterns,
+							...Object.values(relativeRewritePaths).map(to => `${to}**/*.js.map`)
+						]
+					};
 				}
 			};
 		},
