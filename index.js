@@ -2,9 +2,13 @@
 const path = require('path');
 
 const escapeStringRegexp = require('escape-string-regexp');
-const isPlainObject = require('is-plain-object');
 
 const pkg = require('./package.json');
+
+function isPlainObject(x) {
+	return x !== null && typeof x === 'object' &&
+		Reflect.getPrototypeOf(x) === Object.prototype;
+}
 
 function isValidExtensions(extensions) {
 	return Array.isArray(extensions) &&
@@ -14,13 +18,17 @@ function isValidExtensions(extensions) {
 }
 
 function isValidRewritePaths(rewritePaths) {
-	if (!isPlainObject(rewritePaths)) {
-		return false;
-	}
+	return isPlainObject(rewritePaths) &&
+		Object.entries(rewritePaths).every(([from, to]) => {
+			return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
+		});
+}
 
-	return Object.entries(rewritePaths).every(([from, to]) => {
-		return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
-	});
+function isValidConfig(config) {
+	return isPlainObject(config) &&
+		Object.keys(config).every(key => key === 'extensions' || key === 'rewritePaths') &&
+		(config.extensions === undefined || isValidExtensions(config.extensions)) &&
+		isValidRewritePaths(config.rewritePaths);
 }
 
 module.exports = ({negotiateProtocol}) => {
@@ -31,17 +39,7 @@ module.exports = ({negotiateProtocol}) => {
 
 	return {
 		main({config}) {
-			let valid = false;
-			if (isPlainObject(config)) {
-				const keys = Object.keys(config);
-				if (keys.every(key => key === 'extensions' || key === 'rewritePaths')) {
-					valid =
-						(config.extensions === undefined || isValidExtensions(config.extensions)) &&
-						isValidRewritePaths(config.rewritePaths);
-				}
-			}
-
-			if (!valid) {
+			if (!isValidConfig(config)) {
 				throw new Error(`Unexpected Typescript configuration for AVA. See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md for allowed values.`);
 			}
 

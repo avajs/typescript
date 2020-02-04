@@ -19,8 +19,7 @@
     "test": "xo && nyc ava"
   },
   "dependencies": {
-    "escape-string-regexp": "^2.0.0",
-    "is-plain-object": "^3.0.0"
+    "escape-string-regexp": "^2.0.0"
   },
   "devDependencies": {
     "ava": "^3.0.0",
