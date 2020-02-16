@@ -2,9 +2,12 @@
 const path = require('path');
 
 const escapeStringRegexp = require('escape-string-regexp');
-const isPlainObject = require('is-plain-object');
 
 const pkg = require('./package.json');
+
+function isPlainObject(x) {
+	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
+}
 
 function isValidExtensions(extensions) {
 	return Array.isArray(extensions) &&
