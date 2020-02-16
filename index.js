@@ -6,8 +6,7 @@ const escapeStringRegexp = require('escape-string-regexp');
 const pkg = require('./package.json');
 
 function isPlainObject(x) {
-	return x !== null && typeof x === 'object' &&
-		Reflect.getPrototypeOf(x) === Object.prototype;
+	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
 }
 
 function isValidExtensions(extensions) {
