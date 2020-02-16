@@ -18,17 +18,13 @@ function isValidExtensions(extensions) {
 }
 
 function isValidRewritePaths(rewritePaths) {
-	return isPlainObject(rewritePaths) &&
-		Object.entries(rewritePaths).every(([from, to]) => {
-			return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
-		});
-}
+	if (!isPlainObject(rewritePaths)) {
+		return false;
+	}
 
-function isValidConfig(config) {
-	return isPlainObject(config) &&
-		Object.keys(config).every(key => key === 'extensions' || key === 'rewritePaths') &&
-		(config.extensions === undefined || isValidExtensions(config.extensions)) &&
-		isValidRewritePaths(config.rewritePaths);
+	return Object.entries(rewritePaths).every(([from, to]) => {
+		return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
+	});
 }
 
 module.exports = ({negotiateProtocol}) => {
@@ -39,7 +35,17 @@ module.exports = ({negotiateProtocol}) => {
 
 	return {
 		main({config}) {
-			if (!isValidConfig(config)) {
+			let valid = false;
+			if (isPlainObject(config)) {
+				const keys = Object.keys(config);
+				if (keys.every(key => key === 'extensions' || key === 'rewritePaths')) {
+					valid =
+						(config.extensions === undefined || isValidExtensions(config.extensions)) &&
+						isValidRewritePaths(config.rewritePaths);
+				}
+			}
+
+			if (!valid) {
 				throw new Error(`Unexpected Typescript configuration for AVA. See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md for allowed values.`);
 			}
 
