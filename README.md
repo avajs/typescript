@@ -34,6 +34,8 @@ Both keys and values of the `rewritePaths` object must end with a `/`. Paths are
 
 Output files are expected to have the `.js` extension.
 
+AVA searches your entire project for `*.js`, `*.cjs`, `*.mjs` and `*.ts` files (or other extensions you've configured). It will ignore such files found in the `rewritePaths` targets (e.g. `build/`). If you use more specific paths, for instance `build/main/`, you may need to change AVA's `files` configuration to ignore other directories.
+
 ## Add additional extensions
 
 You can configure AVA to recognize additional file extensions. To add (partial†) JSX support:
