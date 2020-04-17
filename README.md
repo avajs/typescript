@@ -4,7 +4,7 @@ Adds rudimentary [TypeScript](https://www.typescriptlang.org/) support to [AVA](
 
 This is designed to work for projects that precompile TypeScript. It allows AVA to load the compiled JavaScript, while configuring AVA to treat the TypeScript files as test files.
 
-In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the test using `npx ava src/test.ts`.
+In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the test using `npm ava src/test.ts`.
 
 ## Enabling TypeScript support
 
