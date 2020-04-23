@@ -61,3 +61,8 @@ You can configure AVA to recognize additional file extensions. To add (partialâ€
 See also AVA's [`extensions` option](https://github.com/avajs/ava/blob/master/docs/06-configuration.md#options).
 
 â€  Note that the [*preserve* mode for JSX](https://www.typescriptlang.org/docs/handbook/jsx.html) is not (yet) supported.
+
+
+## ES modules
+
+Importing ES modules is not supported yet. You must use `require` for now. See issue [#5](https://github.com/avajs/typescript/issues/5)
