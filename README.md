@@ -2,7 +2,7 @@
 
 Adds rudimentary [TypeScript](https://www.typescriptlang.org/) support to [AVA](https://avajs.dev).
 
-This is designed to work for projects that precompile TypeScript. It allows AVA to load the compiled JavaScript, while configuring AVA to treat the TypeScript files as test files.
+This is designed to work for projects that precompile TypeScript (including tests). It allows AVA to load the compiled JavaScript, while configuring AVA to treat the TypeScript files as test files.
 
 In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the test using `npx ava src/test.ts`.
 
@@ -61,8 +61,3 @@ You can configure AVA to recognize additional file extensions. To add (partialâ€
 See also AVA's [`extensions` option](https://github.com/avajs/ava/blob/master/docs/06-configuration.md#options).
 
 â€  Note that the [*preserve* mode for JSX](https://www.typescriptlang.org/docs/handbook/jsx.html) is not (yet) supported.
-
-
-## ES modules
-
-Importing ES modules is not supported yet. You must use `require` for now. See issue [#5](https://github.com/avajs/typescript/issues/5)
