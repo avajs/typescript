@@ -2,7 +2,7 @@
 
 Adds rudimentary [TypeScript](https://www.typescriptlang.org/) support to [AVA](https://avajs.dev).
 
-This is designed to work for projects that precompile their TypeScript code, including tests. It allows AVA to load the resulting JavaScript, while configuring AVA to use the TypeScript files.
+This is designed to work for projects that precompile their TypeScript code, including tests. It allows AVA to load the resulting JavaScript, while configuring AVA to use the TypeScript paths.
 
 In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the `build/test.js` file using `npx ava src/test.ts`. AVA won't pick up any of the JavaScript files present in the `build/` directory, unless they have a TypeScript counterpart in `src/`.
 
