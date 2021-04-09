@@ -36,9 +36,9 @@
     ]
   },
   "xo": {
-		"ignores": [
-			"test/broken-fixtures"
-		],
+    "ignores": [
+      "test/broken-fixtures"
+    ],
     "rules": {
       "import/order": "off"
     }
