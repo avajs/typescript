@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"outDir": "compiled"
+		"outDir": "typescript/compiled"
 	},
 	"include": [
-		"."
+		"typescript"
 	]
 }
