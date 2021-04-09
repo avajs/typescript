@@ -2,7 +2,9 @@ const path = require('path');
 const test = require('ava');
 const del = require('del');
 const execa = require('execa');
-const withProvider = require('./_with-provider');
+const createProviderMacro = require('./_with-provider');
+
+const withProvider = createProviderMacro('ava-3.2', '3.2.0');
 
 test.before('deleting compiled files', async t => {
 	t.log(await del('test/fixtures/compiled'));

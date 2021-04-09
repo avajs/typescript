@@ -1,6 +1,8 @@
 const test = require('ava');
 const pkg = require('../package.json');
-const withProvider = require('./_with-provider');
+const createProviderMacro = require('./_with-provider');
+
+const withProvider = createProviderMacro('ava-3', '3.0.0');
 
 const validateConfig = (t, provider, config) => {
 	const error = t.throws(() => provider.main({config}));
@@ -8,7 +10,7 @@ const validateConfig = (t, provider, config) => {
 	t.snapshot(error);
 };
 
-test('negotiates ava-3 protocol', withProvider, t => t.plan(2), 'ava-3');
+test('negotiates ava-3 protocol', withProvider, t => t.plan(2));
 
 test('main() config validation: throw when config is not a plain object', withProvider, (t, provider) => {
 	validateConfig(t, provider, false);

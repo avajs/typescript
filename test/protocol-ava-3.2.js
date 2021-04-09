@@ -1,6 +1,8 @@
 const path = require('path');
 const test = require('ava');
-const withProvider = require('./_with-provider');
+const createProviderMacro = require('./_with-provider');
+
+const withProvider = createProviderMacro('ava-3.2', '3.2.0');
 
 test('negotiates ava-3.2 protocol', withProvider, t => t.plan(2));
 
