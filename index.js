@@ -2,6 +2,7 @@
 const path = require('path');
 
 const escapeStringRegexp = require('escape-string-regexp');
+const execa = require('execa');
 
 const pkg = require('./package.json');
 
@@ -26,6 +27,14 @@ function isValidRewritePaths(rewritePaths) {
 	});
 }
 
+function isValidCompile(compile) {
+	return typeof compile === 'boolean';
+}
+
+async function compileTypeScript(projectDir) {
+	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDir});
+}
+
 module.exports = ({negotiateProtocol}) => {
 	const protocol = negotiateProtocol(['ava-3.2', 'ava-3'], {version: pkg.version});
 	if (protocol === null) {
@@ -37,10 +46,11 @@ module.exports = ({negotiateProtocol}) => {
 			let valid = false;
 			if (isPlainObject(config)) {
 				const keys = Object.keys(config);
-				if (keys.every(key => key === 'extensions' || key === 'rewritePaths')) {
+				if (keys.every(key => key === 'extensions' || key === 'rewritePaths' || key === 'compile')) {
 					valid =
 						(config.extensions === undefined || isValidExtensions(config.extensions)) &&
-						isValidRewritePaths(config.rewritePaths);
+						isValidRewritePaths(config.rewritePaths) &&
+						isValidCompile(config.compile);
 				}
 			}
 
@@ -50,7 +60,8 @@ module.exports = ({negotiateProtocol}) => {
 
 			const {
 				extensions = ['ts'],
-				rewritePaths: relativeRewritePaths
+				rewritePaths: relativeRewritePaths,
+				compile
 			} = config;
 
 			const rewritePaths = Object.entries(relativeRewritePaths).map(([from, to]) => [
@@ -61,6 +72,10 @@ module.exports = ({negotiateProtocol}) => {
 
 			return {
 				async compile() {
+					if (compile) {
+						await compileTypeScript(protocol.projectDir);
+					}
+
 					return {
 						extensions: extensions.slice(),
 						rewritePaths: rewritePaths.slice()

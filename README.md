@@ -2,9 +2,9 @@
 
 Adds rudimentary [TypeScript](https://www.typescriptlang.org/) support to [AVA](https://avajs.dev).
 
-This is designed to work for projects that precompile their TypeScript code, including tests. It allows AVA to load the resulting JavaScript, while configuring AVA to use the TypeScript paths.
+This is designed to work for projects that precompile TypeScript. It allows AVA to load the compiled JavaScript, while configuring AVA to treat the TypeScript files as test files.
 
-In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the `build/test.js` file using `npx ava src/test.ts`. AVA won't pick up any of the JavaScript files present in the `build/` directory, unless they have a TypeScript counterpart in `src/`.
+In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the test using `npx ava src/test.ts`.
 
 ## Enabling TypeScript support
 
@@ -24,13 +24,15 @@ Then, enable TypeScript support either in `package.json` or `ava.config.*`:
 		"typescript": {
 			"rewritePaths": {
 				"src/": "build/"
-			}
+			},
+			"compile": true
 		}
 	}
 }
 ```
 
-Both keys and values of the `rewritePaths` object must end with a `/`. Paths are relative to your project directory.
+Both keys and values of the `rewritePaths` object must end with a `/`. Paths are relative to your project directory.\
+You can enable compilation via the `compile` property. It is recommended to set it to `false` when running `ts` in a watcher mode.
 
 Output files are expected to have the `.js` extension.
 
