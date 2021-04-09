@@ -1,12 +1,10 @@
 'use strict';
 const path = require('path');
-
 const escapeStringRegexp = require('escape-string-regexp');
 const execa = require('execa');
-
 const pkg = require('./package.json');
 
-const help = 'See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md';
+const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
 
 function isPlainObject(x) {
 	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
@@ -83,7 +81,6 @@ module.exports = ({negotiateProtocol}) => {
 		main({config}) {
 			if (!isPlainObject(config)) {
 				throw new Error(`Unexpected Typescript configuration for AVA. ${help}`);
-
 			}
 
 			validate(config, configProperties);
