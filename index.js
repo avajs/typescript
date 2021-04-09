@@ -6,8 +6,29 @@ const execa = require('execa');
 
 const pkg = require('./package.json');
 
+const help = 'See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md';
+
 function isPlainObject(x) {
 	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
+}
+
+function validate(target, properties) {
+	const keys = Object.keys(properties);
+
+	for (const key of keys) {
+		const {required, isValid} = properties[key];
+		const missing = target[key] === undefined;
+
+		if (required && missing) {
+			throw new Error(`Missing '${key}' property in TypeScript configuration for AVA. ${help}`);
+		} else if (!required && missing) {
+			return;
+		}
+
+		if (!isValid(target[key])) {
+			throw new Error(`Invalid '${key}' property in TypeScript configuration for AVA. ${help}`);
+		}
+	}
 }
 
 function isValidExtensions(extensions) {
@@ -35,6 +56,21 @@ async function compileTypeScript(projectDir) {
 	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDir});
 }
 
+const configProperties = {
+	compile: {
+		required: true,
+		isValid: isValidCompile
+	},
+	rewritePaths: {
+		required: true,
+		isValid: isValidRewritePaths
+	},
+	extensions: {
+		required: false,
+		isValid: isValidExtensions
+	}
+};
+
 module.exports = ({negotiateProtocol}) => {
 	const protocol = negotiateProtocol(['ava-3.2', 'ava-3'], {version: pkg.version});
 	if (protocol === null) {
@@ -43,20 +79,12 @@ module.exports = ({negotiateProtocol}) => {
 
 	return {
 		main({config}) {
-			let valid = false;
-			if (isPlainObject(config)) {
-				const keys = Object.keys(config);
-				if (keys.every(key => key === 'extensions' || key === 'rewritePaths' || key === 'compile')) {
-					valid =
-						(config.extensions === undefined || isValidExtensions(config.extensions)) &&
-						isValidRewritePaths(config.rewritePaths) &&
-						isValidCompile(config.compile);
-				}
+			if (!isPlainObject(config)) {
+				throw new Error(`Unexpected Typescript configuration for AVA. ${help}`);
+
 			}
 
-			if (!valid) {
-				throw new Error(`Unexpected Typescript configuration for AVA. See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md for allowed values.`);
-			}
+			validate(config, configProperties);
 
 			const {
 				extensions = ['ts'],
