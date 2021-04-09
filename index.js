@@ -19,9 +19,11 @@ function validate(target, properties) {
 		const {required, isValid} = properties[key];
 		const missing = target[key] === undefined;
 
-		if (required && missing) {
-			throw new Error(`Missing '${key}' property in TypeScript configuration for AVA. ${help}`);
-		} else if (!required && missing) {
+		if (missing) {
+			if (required) {
+				throw new Error(`Missing '${key}' property in TypeScript configuration for AVA. ${help}`);
+			}
+
 			return;
 		}
 
