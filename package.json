@@ -35,6 +35,11 @@
       "text"
     ]
   },
+  "ava": {
+    "files": [
+      "!test/broken-fixtures/**"
+    ]
+  },
   "xo": {
     "ignores": [
       "test/broken-fixtures"

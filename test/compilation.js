@@ -9,6 +9,7 @@ const withAltProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirn
 
 test.before('deleting compiled files', async t => {
 	t.log(await del('test/fixtures/typescript/compiled'));
+	t.log(await del('test/broken-fixtures/typescript/compiled'));
 });
 
 const compile = async provider => {
