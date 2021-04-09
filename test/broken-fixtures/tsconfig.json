@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"outDir": "fixtures/compiled"
+		"outDir": "compiled"
 	},
 	"include": [
-		"fixtures"
+		"."
 	]
 }

@@ -2,7 +2,7 @@ const path = require('path');
 const pkg = require('../package.json');
 const makeProvider = require('..');
 
-const createProviderMacro = (identifier, avaVersion) => {
+const createProviderMacro = (identifier, avaVersion, projectDir = __dirname) => {
 	return (t, run) => run(t, makeProvider({
 		negotiateProtocol(identifiers, {version}) {
 			t.true(identifiers.includes(identifier));
@@ -12,9 +12,9 @@ const createProviderMacro = (identifier, avaVersion) => {
 				identifier,
 				normalizeGlobPatterns: patterns => patterns,
 				async findFiles({patterns}) {
-					return patterns.map(file => path.join(__dirname, file));
+					return patterns.map(file => path.join(projectDir, file));
 				},
-				projectDir: __dirname
+				projectDir
 			};
 		}
 	}));
