@@ -31,27 +31,6 @@ function validate(target, properties) {
 	}
 }
 
-function isValidExtensions(extensions) {
-	return Array.isArray(extensions) &&
-		extensions.length > 0 &&
-		extensions.every(ext => typeof ext === 'string' && ext !== '') &&
-		new Set(extensions).size === extensions.length;
-}
-
-function isValidRewritePaths(rewritePaths) {
-	if (!isPlainObject(rewritePaths)) {
-		return false;
-	}
-
-	return Object.entries(rewritePaths).every(([from, to]) => {
-		return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
-	});
-}
-
-function isValidCompile(compile) {
-	return typeof compile === 'boolean';
-}
-
 async function compileTypeScript(projectDir) {
 	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDir});
 }
@@ -59,15 +38,30 @@ async function compileTypeScript(projectDir) {
 const configProperties = {
 	compile: {
 		required: true,
-		isValid: isValidCompile
+		isValid(compile) {
+			return typeof compile === 'boolean';
+		}
 	},
 	rewritePaths: {
 		required: true,
-		isValid: isValidRewritePaths
+		isValid(rewritePaths) {
+			if (!isPlainObject(rewritePaths)) {
+				return false;
+			}
+
+			return Object.entries(rewritePaths).every(([from, to]) => {
+				return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
+			});
+		}
 	},
 	extensions: {
 		required: false,
-		isValid: isValidExtensions
+		isValid(extensions) {
+			return Array.isArray(extensions) &&
+				extensions.length > 0 &&
+				extensions.every(ext => typeof ext === 'string' && ext !== '') &&
+				new Set(extensions).size === extensions.length;
+		}
 	}
 };
 
