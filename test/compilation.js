@@ -20,7 +20,7 @@ const compile = async provider => {
 					'ts/': 'typescript/',
 					'compiled/': 'typescript/compiled/'
 				},
-				compile: true
+				compile: 'tsc'
 			}
 		}).compile()
 	};

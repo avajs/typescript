@@ -39,7 +39,7 @@ const configProperties = {
 	compile: {
 		required: true,
 		isValid(compile) {
-			return typeof compile === 'boolean';
+			return compile === false || compile === 'tsc';
 		}
 	},
 	rewritePaths: {
@@ -93,7 +93,7 @@ module.exports = ({negotiateProtocol}) => {
 
 			return {
 				async compile() {
-					if (compile) {
+					if (compile === 'tsc') {
 						await compileTypeScript(protocol.projectDir);
 					}
 
