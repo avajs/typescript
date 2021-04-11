@@ -3,7 +3,7 @@ const makeProvider = require('../..');
 
 const provider = makeProvider({
 	negotiateProtocol() {
-		return {identifier: 'ava-3', ava: {version: '3.0.0'}, projectDir: __dirname};
+		return {identifier: 'ava-3.2', ava: {version: '3.15.0'}, projectDir: __dirname};
 	}
 });
 
