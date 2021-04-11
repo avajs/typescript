@@ -40,7 +40,7 @@ test('main() config validation: config may not be an empty object', withProvider
 	validateConfig(t, provider, {});
 });
 
-test('main() config validation: throw when config.compile is not a boolean', withProvider, (t, provider) => {
+test('main() config validation: throw when config.compile is invalid', withProvider, (t, provider) => {
 	validateConfig(t, provider, {rewritePaths: {'src/': 'build/'}, compile: 1});
 	validateConfig(t, provider, {rewritePaths: {'src/': 'build/'}, compile: undefined});
 });
