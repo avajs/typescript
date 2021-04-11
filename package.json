@@ -39,7 +39,8 @@
   "ava": {
     "files": [
       "!test/broken-fixtures/**"
-    ]
+    ],
+    "timeout": "60s"
   },
   "xo": {
     "ignores": [
