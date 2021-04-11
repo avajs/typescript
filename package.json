@@ -19,7 +19,7 @@
     "test": "xo && c8 ava"
   },
   "dependencies": {
-    "escape-string-regexp": "^2.0.0"
+    "escape-string-regexp": "^4.0.0"
   },
   "devDependencies": {
     "ava": "^3.15.0",
