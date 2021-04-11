@@ -21,7 +21,7 @@ test('main() config validation: throw when config is not a plain object', withPr
 });
 
 test('main() config validation: throw when config contains keys other than \'extensions\', \'rewritePaths\' or \'compile\'', withProvider, (t, provider) => {
-	validateConfig(t, provider, {foo: 1});
+	validateConfig(t, provider, {compile: false, foo: 1, rewritePaths: {'src/': 'build/'}});
 });
 
 test('main() config validation: throw when config.extensions contains empty strings', withProvider, (t, provider) => {

@@ -11,22 +11,26 @@ function isPlainObject(x) {
 }
 
 function validate(target, properties) {
-	const keys = Object.keys(properties);
-
-	for (const key of keys) {
+	for (const key of Object.keys(properties)) {
 		const {required, isValid} = properties[key];
-		const missing = target[key] === undefined;
+		const missing = !Reflect.has(target, key);
 
 		if (missing) {
 			if (required) {
 				throw new Error(`Missing '${key}' property in TypeScript configuration for AVA. ${help}`);
 			}
 
-			return;
+			continue;
 		}
 
 		if (!isValid(target[key])) {
 			throw new Error(`Invalid '${key}' property in TypeScript configuration for AVA. ${help}`);
+		}
+	}
+
+	for (const key of Object.keys(target)) {
+		if (!Reflect.has(properties, key)) {
+			throw new Error(`Unexpected '${key}' property in TypeScript configuration for AVA. ${help}`);
 		}
 	}
 }
