@@ -27,7 +27,7 @@ function isValidRewritePaths(rewritePaths) {
 }
 
 module.exports = ({negotiateProtocol}) => {
-	const protocol = negotiateProtocol(['ava-3.2', 'ava-3'], {version: pkg.version});
+	const protocol = negotiateProtocol(['ava-3.2'], {version: pkg.version});
 	if (protocol === null) {
 		return;
 	}
