@@ -16,18 +16,18 @@
     "typescript"
   ],
   "scripts": {
-    "test": "xo && nyc ava"
+    "test": "xo && c8 ava"
   },
   "dependencies": {
     "escape-string-regexp": "^2.0.0"
   },
   "devDependencies": {
-    "ava": "^3.0.0",
-    "execa": "^4.0.0",
-    "nyc": "^15.0.0",
-    "xo": "^0.25.3"
+    "ava": "^3.15.0",
+    "c8": "^7.7.1",
+    "execa": "^5.0.0",
+    "xo": "^0.38.2"
   },
-  "nyc": {
+  "c8": {
     "reporter": [
       "html",
       "lcov",
