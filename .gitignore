@@ -1,2 +1,4 @@
 /coverage
 /node_modules
+/test/fixtures/typescript/compiled
+/test/broken-fixtures/typescript/compiled

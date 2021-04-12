@@ -3,16 +3,16 @@ const makeProvider = require('../..');
 
 const provider = makeProvider({
 	negotiateProtocol() {
-		return {identifier: process.argv[2], ava: {version: '3.0.0'}, projectDir: path.resolve(__dirname, '..')};
+		return {identifier: 'ava-3.2', ava: {version: '3.15.0'}, projectDir: __dirname};
 	}
 });
 
 const worker = provider.worker({
 	extensionsToLoadAsModules: [],
-	state: JSON.parse(process.argv[3])
+	state: JSON.parse(process.argv[2])
 });
 
-const ref = path.resolve(process.argv[4]);
+const ref = path.resolve(process.argv[3]);
 
 if (worker.canLoad(ref)) {
 	worker.load(ref, {requireFn: require});
