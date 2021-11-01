@@ -1,6 +1,10 @@
-const path = require('path');
-const pkg = require('../package.json');
-const makeProvider = require('..');
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import makeProvider from '@ava/typescript';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const pkg = fs.readFileSync(new URL('../package.json', import.meta.url));
 
 const createProviderMacro = (identifier, avaVersion, projectDir = __dirname) => (t, run) => run(t, makeProvider({
 	negotiateProtocol(identifiers, {version}) {
@@ -18,4 +22,4 @@ const createProviderMacro = (identifier, avaVersion, projectDir = __dirname) => 
 	},
 }));
 
-module.exports = createProviderMacro;
+export default createProviderMacro;

@@ -1,9 +1,11 @@
-const path = require('path');
-const test = require('ava');
-const del = require('del');
-const execa = require('execa');
-const createProviderMacro = require('./_with-provider');
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import test from 'ava';
+import del from 'del';
+import execa from 'execa';
+import createProviderMacro from './_with-provider.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const withProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirname, 'fixtures'));
 const withAltProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirname, 'broken-fixtures'));
 
