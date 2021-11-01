@@ -8,6 +8,10 @@
   "files": [
     "index.js"
   ],
+  "exports": {
+    ".": "./index.js"
+  },
+  "type": "module",
   "author": "Mark Wubben (https://novemberborn.net)",
   "repository": "avajs/typescript",
   "license": "MIT",
@@ -19,7 +23,7 @@
     "test": "xo && c8 ava"
   },
   "dependencies": {
-    "escape-string-regexp": "^4.0.0",
+    "escape-string-regexp": "^5.0.0",
     "execa": "^5.1.1"
   },
   "devDependencies": {
@@ -45,11 +49,6 @@
   "xo": {
     "ignores": [
       "test/broken-fixtures"
-    ],
-    "rules": {
-      "import/extensions": "off",
-      "import/order": "off",
-      "unicorn/prefer-module": "off"
-    }
+    ]
   }
 }

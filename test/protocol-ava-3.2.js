@@ -1,8 +1,11 @@
-const path = require('path');
-const test = require('ava');
-const pkg = require('../package.json');
-const createProviderMacro = require('./_with-provider');
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import test from 'ava';
+import createProviderMacro from './_with-provider.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const pkg = fs.readFileSync(new URL('../package.json', import.meta.url));
 const withProvider = createProviderMacro('ava-3.2', '3.15.0');
 
 const validateConfig = (t, provider, config) => {

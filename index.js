@@ -1,9 +1,9 @@
-'use strict';
-const path = require('path');
-const escapeStringRegexp = require('escape-string-regexp');
-const execa = require('execa');
-const pkg = require('./package.json');
+import fs from 'node:fs';
+import path from 'node:path';
+import escapeStringRegexp from 'escape-string-regexp';
+import execa from 'execa';
 
+const pkg = fs.readFileSync(new URL('package.json', import.meta.url));
 const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
 
 function isPlainObject(x) {
@@ -67,7 +67,7 @@ const configProperties = {
 	},
 };
 
-module.exports = ({negotiateProtocol}) => {
+export default function typescriptProvider({negotiateProtocol}) {
 	const protocol = negotiateProtocol(['ava-3.2'], {version: pkg.version});
 	if (protocol === null) {
 		return;
@@ -171,4 +171,4 @@ module.exports = ({negotiateProtocol}) => {
 			};
 		},
 	};
-};
+}
