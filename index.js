@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import escapeStringRegexp from 'escape-string-regexp';
 import execa from 'execa';
 
@@ -149,6 +150,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 		},
 
 		worker({extensionsToLoadAsModules, state: {extensions, rewritePaths}}) {
+			const useImport = extensionsToLoadAsModules.includes('js');
 			const testFileExtension = new RegExp(`\\.(${extensions.map(ext => escapeStringRegexp(ext)).join('|')})$`);
 
 			return {
@@ -157,16 +159,10 @@ export default function typescriptProvider({negotiateProtocol}) {
 				},
 
 				async load(ref, {requireFn}) {
-					for (const extension of extensionsToLoadAsModules) {
-						if (ref.endsWith(`.${extension}`)) {
-							throw new Error('@ava/typescript cannot yet load ESM files');
-						}
-					}
-
 					const [from, to] = rewritePaths.find(([from]) => ref.startsWith(from));
 					// TODO: Support JSX preserve mode — https://www.typescriptlang.org/docs/handbook/jsx.html
 					const rewritten = `${to}${ref.slice(from.length)}`.replace(testFileExtension, '.js');
-					return requireFn(rewritten);
+					return useImport ? import(pathToFileURL(rewritten)) : requireFn(rewritten); // eslint-disable-line node/no-unsupported-features/es-syntax
 				},
 			};
 		},
