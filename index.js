@@ -44,7 +44,7 @@ const configProperties = {
 		required: true,
 		isValid(compile) {
 			return compile === false || compile === 'tsc';
-		}
+		},
 	},
 	rewritePaths: {
 		required: true,
@@ -53,20 +53,18 @@ const configProperties = {
 				return false;
 			}
 
-			return Object.entries(rewritePaths).every(([from, to]) => {
-				return from.endsWith('/') && typeof to === 'string' && to.endsWith('/');
-			});
-		}
+			return Object.entries(rewritePaths).every(([from, to]) => from.endsWith('/') && typeof to === 'string' && to.endsWith('/'));
+		},
 	},
 	extensions: {
 		required: false,
 		isValid(extensions) {
-			return Array.isArray(extensions) &&
-				extensions.length > 0 &&
-				extensions.every(ext => typeof ext === 'string' && ext !== '') &&
-				new Set(extensions).size === extensions.length;
-		}
-	}
+			return Array.isArray(extensions)
+				&& extensions.length > 0
+				&& extensions.every(ext => typeof ext === 'string' && ext !== '')
+				&& new Set(extensions).size === extensions.length;
+		},
+	},
 };
 
 module.exports = ({negotiateProtocol}) => {
@@ -86,12 +84,12 @@ module.exports = ({negotiateProtocol}) => {
 			const {
 				extensions = ['ts'],
 				rewritePaths: relativeRewritePaths,
-				compile
+				compile,
 			} = config;
 
 			const rewritePaths = Object.entries(relativeRewritePaths).map(([from, to]) => [
 				path.join(protocol.projectDir, from),
-				path.join(protocol.projectDir, to)
+				path.join(protocol.projectDir, to),
 			]);
 			const testFileExtension = new RegExp(`\\.(${extensions.map(ext => escapeStringRegexp(ext)).join('|')})$`);
 
@@ -102,13 +100,13 @@ module.exports = ({negotiateProtocol}) => {
 					}
 
 					return {
-						extensions: extensions.slice(),
-						rewritePaths: rewritePaths.slice()
+						extensions: [...extensions],
+						rewritePaths: [...rewritePaths],
 					};
 				},
 
 				get extensions() {
-					return extensions.slice();
+					return [...extensions];
 				},
 
 				ignoreChange(filePath) {
@@ -139,14 +137,14 @@ module.exports = ({negotiateProtocol}) => {
 						filePatterns: [
 							...filePatterns,
 							'!**/*.d.ts',
-							...Object.values(relativeRewritePaths).map(to => `!${to}**`)
+							...Object.values(relativeRewritePaths).map(to => `!${to}**`),
 						],
 						ignoredByWatcherPatterns: [
 							...ignoredByWatcherPatterns,
-							...Object.values(relativeRewritePaths).map(to => `${to}**/*.js.map`)
-						]
+							...Object.values(relativeRewritePaths).map(to => `${to}**/*.js.map`),
+						],
 					};
-				}
+				},
 			};
 		},
 
@@ -169,8 +167,8 @@ module.exports = ({negotiateProtocol}) => {
 					// TODO: Support JSX preserve mode — https://www.typescriptlang.org/docs/handbook/jsx.html
 					const rewritten = `${to}${ref.slice(from.length)}`.replace(testFileExtension, '.js');
 					return requireFn(rewritten);
-				}
+				},
 			};
-		}
+		},
 	};
 };

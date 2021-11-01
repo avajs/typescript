@@ -81,6 +81,6 @@ test('main() updateGlobs()', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
 	t.snapshot(main.updateGlobs({
 		filePatterns: ['src/test.ts'],
-		ignoredByWatcherPatterns: ['assets/**']
+		ignoredByWatcherPatterns: ['assets/**'],
 	}));
 });

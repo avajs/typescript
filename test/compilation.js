@@ -12,26 +12,24 @@ test.before('deleting compiled files', async t => {
 	t.log(await del('test/broken-fixtures/typescript/compiled'));
 });
 
-const compile = async provider => {
-	return {
-		state: await provider.main({
-			config: {
-				rewritePaths: {
-					'ts/': 'typescript/',
-					'compiled/': 'typescript/compiled/'
-				},
-				compile: 'tsc'
-			}
-		}).compile()
-	};
-};
+const compile = async provider => ({
+	state: await provider.main({
+		config: {
+			rewritePaths: {
+				'ts/': 'typescript/',
+				'compiled/': 'typescript/compiled/',
+			},
+			compile: 'tsc',
+		},
+	}).compile(),
+});
 
 test('worker(): load rewritten paths files', withProvider, async (t, provider) => {
 	const {state} = await compile(provider);
 	const {stdout, stderr} = await execa.node(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify(state), path.join(__dirname, 'fixtures/ts', 'file.ts')],
-		{cwd: path.join(__dirname, 'fixtures')}
+		{cwd: path.join(__dirname, 'fixtures')},
 	);
 	if (stderr.length > 0) {
 		t.log(stderr);
@@ -45,7 +43,7 @@ test('worker(): runs compiled files', withProvider, async (t, provider) => {
 	const {stdout, stderr} = await execa.node(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify(state), path.join(__dirname, 'fixtures/compiled', 'index.ts')],
-		{cwd: path.join(__dirname, 'fixtures')}
+		{cwd: path.join(__dirname, 'fixtures')},
 	);
 	if (stderr.length > 0) {
 		t.log(stderr);
