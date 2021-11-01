@@ -30,7 +30,7 @@ test('worker(): load rewritten paths files', withProvider, async (t, provider) =
 	const {state} = await compile(provider);
 	const {stdout, stderr} = await execa.node(
 		path.join(__dirname, 'fixtures/install-and-load'),
-		[JSON.stringify(state), path.join(__dirname, 'fixtures/ts', 'file.ts')],
+		[JSON.stringify({state}), path.join(__dirname, 'fixtures/ts', 'file.ts')],
 		{cwd: path.join(__dirname, 'fixtures')},
 	);
 	if (stderr.length > 0) {
@@ -44,7 +44,7 @@ test('worker(): runs compiled files', withProvider, async (t, provider) => {
 	const {state} = await compile(provider);
 	const {stdout, stderr} = await execa.node(
 		path.join(__dirname, 'fixtures/install-and-load'),
-		[JSON.stringify(state), path.join(__dirname, 'fixtures/compiled', 'index.ts')],
+		[JSON.stringify({state}), path.join(__dirname, 'fixtures/compiled', 'index.ts')],
 		{cwd: path.join(__dirname, 'fixtures')},
 	);
 	if (stderr.length > 0) {

@@ -39,6 +39,10 @@ Output files are expected to have the `.js` extension.
 
 AVA searches your entire project for `*.js`, `*.cjs`, `*.mjs` and `*.ts` files (or other extensions you've configured). It will ignore such files found in the `rewritePaths` targets (e.g. `build/`). If you use more specific paths, for instance `build/main/`, you may need to change AVA's `files` configuration to ignore other directories.
 
+## ES Modules
+
+When used with AVA 4, if your `package.json` has configured `"type": "module"`, or you've configured AVA to treat the `js` extension as `module`, then `@ava/typescript` will import the output file as an ES module. Note that this is based on the *output file*, not the `ts` extension.
+
 ## Add additional extensions
 
 You can configure AVA to recognize additional file extensions. To add (partial†) JSX support:
