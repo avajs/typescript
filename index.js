@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url';
 import escapeStringRegexp from 'escape-string-regexp';
 import execa from 'execa';
 
-const pkg = fs.readFileSync(new URL('package.json', import.meta.url));
+const pkg = JSON.parse(fs.readFileSync(new URL('package.json', import.meta.url)));
 const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
 
 function isPlainObject(x) {
