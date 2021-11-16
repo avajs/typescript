@@ -5,7 +5,7 @@ import test from 'ava';
 import createProviderMacro from './_with-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = fs.readFileSync(new URL('../package.json', import.meta.url));
+const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
 const withProvider = createProviderMacro('ava-3.2', '3.15.0');
 
 const validateConfig = (t, provider, config) => {
