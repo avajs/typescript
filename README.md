@@ -1,10 +1,20 @@
 # @ava/typescript
 
-Adds [TypeScript](https://www.typescriptlang.org/) support to [AVA](https://avajs.dev).
+Adds [TypeScript](https://www.typescriptlang.org/) support to [AVA 4](https://avajs.dev).
 
 This is designed to work for projects that precompile TypeScript. It allows AVA to load the compiled JavaScript, while configuring AVA to treat the TypeScript files as test files.
 
 In other words, say you have a test file at `src/test.ts`. You've configured TypeScript to output to `build/`. Using `@ava/typescript` you can run the test using `npx ava src/test.ts`.
+
+## For AVA 3 users
+
+Use version 2:
+
+```console
+npm install --save-dev @ava/typescript@2
+```
+
+Note that v2 does not support ES modules. This requires v3 and AVA 4.
 
 ## Enabling TypeScript support
 
@@ -41,7 +51,7 @@ AVA searches your entire project for `*.js`, `*.cjs`, `*.mjs` and `*.ts` files (
 
 ## ES Modules
 
-When used with AVA 4, if your `package.json` has configured `"type": "module"`, or you've configured AVA to treat the `js` extension as `module`, then `@ava/typescript` will import the output file as an ES module. Note that this is based on the *output file*, not the `ts` extension.
+If your `package.json` has configured `"type": "module"`, or you've configured AVA to treat the `js` extension as `module`, then `@ava/typescript` will import the output file as an ES module. Note that this is based on the *output file*, not the `ts` extension.
 
 ## Add additional extensions
 
