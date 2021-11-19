@@ -115,7 +115,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 						return false;
 					}
 
-					return rewritePaths.some(([from]) => filePath.startsWith(from));
+					return rewritePaths.some(([to, from]) => filePath.startsWith(compile === 'tsc' ? from : to));
 				},
 
 				resolveTestFile(testfile) {
@@ -142,7 +142,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 						],
 						ignoredByWatcherPatterns: [
 							...ignoredByWatcherPatterns,
-							...Object.values(relativeRewritePaths).map(to => `${to}**/*.js.map`),
+							...Object.entries(relativeRewritePaths).map(([to, from]) => `${compile === 'tsc' ? from : to}**`),
 						],
 					};
 				},
