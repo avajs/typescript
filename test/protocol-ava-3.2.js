@@ -67,9 +67,15 @@ test('main() extensions: always returns new arrays', withProvider, (t, provider)
 	t.not(main.extensions, main.extensions);
 });
 
-test('main() ignoreChange()', withProvider, (t, provider) => {
+test('main() ignoreChange() without compilation', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
 	t.true(main.ignoreChange(path.join(__dirname, 'src/foo.ts')));
+	t.false(main.ignoreChange(path.join(__dirname, 'build/foo.js')));
+});
+
+test('main() ignoreChange() with compilation', withProvider, (t, provider) => {
+	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: 'tsc'}});
+	t.false(main.ignoreChange(path.join(__dirname, 'src/foo.ts')));
 	t.false(main.ignoreChange(path.join(__dirname, 'build/foo.js')));
 });
 
@@ -80,8 +86,16 @@ test('main() resolveTestfile()', withProvider, (t, provider) => {
 	t.is(main.resolveTestFile(path.join(__dirname, 'foo/bar.ts')), path.join(__dirname, 'foo/bar.ts'));
 });
 
-test('main() updateGlobs()', withProvider, (t, provider) => {
+test('main() updateGlobs() without compilation', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
+	t.snapshot(main.updateGlobs({
+		filePatterns: ['src/test.ts'],
+		ignoredByWatcherPatterns: ['assets/**'],
+	}));
+});
+
+test('main() updateGlobs() with compilation', withProvider, (t, provider) => {
+	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: 'tsc'}});
 	t.snapshot(main.updateGlobs({
 		filePatterns: ['src/test.ts'],
 		ignoredByWatcherPatterns: ['assets/**'],

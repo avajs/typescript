@@ -88,6 +88,8 @@ export default function typescriptProvider({negotiateProtocol}) {
 				compile,
 			} = config;
 
+			const compilerEnabled = compile === 'tsc';
+
 			const rewritePaths = Object.entries(relativeRewritePaths).map(([from, to]) => [
 				path.join(protocol.projectDir, from),
 				path.join(protocol.projectDir, to),
@@ -96,7 +98,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 			return {
 				async compile() {
-					if (compile === 'tsc') {
+					if (compilerEnabled) {
 						await compileTypeScript(protocol.projectDir);
 					}
 
@@ -115,7 +117,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 						return false;
 					}
 
-					return rewritePaths.some(([to, from]) => filePath.startsWith(compile === 'tsc' ? from : to));
+					return rewritePaths.some(([from, to]) => filePath.startsWith(compilerEnabled ? to : from));
 				},
 
 				resolveTestFile(testfile) {
@@ -142,7 +144,8 @@ export default function typescriptProvider({negotiateProtocol}) {
 						],
 						ignoredByWatcherPatterns: [
 							...ignoredByWatcherPatterns,
-							...Object.entries(relativeRewritePaths).map(([to, from]) => `${compile === 'tsc' ? from : to}**`),
+							...Object.values(relativeRewritePaths).map(to => `${to}**/*.js.map`),
+							...Object.entries(relativeRewritePaths).map(([from, to]) => `${compilerEnabled ? to : from}**`),
 						],
 					};
 				},
