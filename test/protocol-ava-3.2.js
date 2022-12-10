@@ -53,8 +53,8 @@ test('main() config validation: rewrite paths must end in a /', withProvider, (t
 	validateConfig(t, provider, {rewritePaths: {'src/': 'build', compile: false}});
 });
 
-test('main() extensions: defaults to [\'ts\']', withProvider, (t, provider) => {
-	t.deepEqual(provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}}).extensions, ['ts']);
+test('main() extensions: defaults to [\'ts\', \'cts\', \'mts\']', withProvider, (t, provider) => {
+	t.deepEqual(provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}}).extensions, ['ts', 'cts', 'mts']);
 });
 
 test('main() extensions: returns configured extensions', withProvider, (t, provider) => {
@@ -76,6 +76,8 @@ test('main() ignoreChange()', withProvider, (t, provider) => {
 test('main() resolveTestfile()', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
 	t.is(main.resolveTestFile(path.join(__dirname, 'src/foo.ts')), path.join(__dirname, 'build/foo.js'));
+	t.is(main.resolveTestFile(path.join(__dirname, 'src/foo.cts')), path.join(__dirname, 'build/foo.cjs'));
+	t.is(main.resolveTestFile(path.join(__dirname, 'src/foo.mts')), path.join(__dirname, 'build/foo.mjs'));
 	t.is(main.resolveTestFile(path.join(__dirname, 'build/foo.js')), path.join(__dirname, 'build/foo.js'));
 	t.is(main.resolveTestFile(path.join(__dirname, 'foo/bar.ts')), path.join(__dirname, 'foo/bar.ts'));
 });
