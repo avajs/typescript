@@ -75,6 +75,8 @@ You can configure AVA to recognize additional file extensions. To add (partialâ€
 }
 ```
 
+If you use the [`allowJs` TypeScript option](https://www.typescriptlang.org/tsconfig/allowJs.html) you'll have to specify the `js`, `cjs` and `mjs` extensions for them to be rewritten.
+
 See also AVA's [`extensions` option](https://github.com/avajs/ava/blob/master/docs/06-configuration.md#options).
 
 â€  Note that the [*preserve* mode for JSX](https://www.typescriptlang.org/docs/handbook/jsx.html) is not (yet) supported.
