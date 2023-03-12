@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import escapeStringRegexp from 'escape-string-regexp';
-import execa from 'execa';
+import {execa} from 'execa';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('package.json', import.meta.url)));
 const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
@@ -182,7 +182,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 						useImport = importJs;
 					}
 
-					return useImport ? import(pathToFileURL(rewritten)) : requireFn(rewritten); // eslint-disable-line node/no-unsupported-features/es-syntax
+					return useImport ? import(pathToFileURL(rewritten)) : requireFn(rewritten);
 				},
 			};
 		},

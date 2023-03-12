@@ -1,7 +1,7 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import test from 'ava';
-import execa from 'execa';
+import {execaNode} from 'execa';
 import createProviderMacro from './_with-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,7 +20,7 @@ const setup = async provider => ({
 
 test('worker(): load .cts', withProvider, async (t, provider) => {
 	const {state} = await setup(provider);
-	const {stdout, stderr} = await execa.node(
+	const {stdout, stderr} = await execaNode(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify({state}), path.join(__dirname, 'fixtures/load', 'index.cts')],
 		{cwd: path.join(__dirname, 'fixtures')},
@@ -34,7 +34,7 @@ test('worker(): load .cts', withProvider, async (t, provider) => {
 
 test('worker(): load .mts', withProvider, async (t, provider) => {
 	const {state} = await setup(provider);
-	const {stdout, stderr} = await execa.node(
+	const {stdout, stderr} = await execaNode(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify({state}), path.join(__dirname, 'fixtures/load', 'index.mts')],
 		{cwd: path.join(__dirname, 'fixtures')},
@@ -48,7 +48,7 @@ test('worker(): load .mts', withProvider, async (t, provider) => {
 
 test('worker(): load .ts', withProvider, async (t, provider) => {
 	const {state} = await setup(provider);
-	const {stdout, stderr} = await execa.node(
+	const {stdout, stderr} = await execaNode(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify({extensionsToLoadAsModules: ['js'], state}), path.join(__dirname, 'fixtures/load', 'index.ts')],
 		{cwd: path.join(__dirname, 'fixtures')},

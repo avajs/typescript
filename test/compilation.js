@@ -1,8 +1,8 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import test from 'ava';
-import del from 'del';
-import execa from 'execa';
+import {deleteAsync} from 'del';
+import {execaNode} from 'execa';
 import createProviderMacro from './_with-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -10,8 +10,8 @@ const withProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirname
 const withAltProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirname, 'broken-fixtures'));
 
 test.before('deleting compiled files', async t => {
-	t.log(await del('test/fixtures/typescript/compiled'));
-	t.log(await del('test/broken-fixtures/typescript/compiled'));
+	t.log(await deleteAsync('test/fixtures/typescript/compiled'));
+	t.log(await deleteAsync('test/broken-fixtures/typescript/compiled'));
 });
 
 const compile = async provider => ({
@@ -28,7 +28,7 @@ const compile = async provider => ({
 
 test('worker(): load rewritten paths files', withProvider, async (t, provider) => {
 	const {state} = await compile(provider);
-	const {stdout, stderr} = await execa.node(
+	const {stdout, stderr} = await execaNode(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify({state}), path.join(__dirname, 'fixtures/ts', 'file.ts')],
 		{cwd: path.join(__dirname, 'fixtures')},
@@ -42,7 +42,7 @@ test('worker(): load rewritten paths files', withProvider, async (t, provider) =
 
 test('worker(): runs compiled files', withProvider, async (t, provider) => {
 	const {state} = await compile(provider);
-	const {stdout, stderr} = await execa.node(
+	const {stdout, stderr} = await execaNode(
 		path.join(__dirname, 'fixtures/install-and-load'),
 		[JSON.stringify({state}), path.join(__dirname, 'fixtures/compiled', 'index.ts')],
 		{cwd: path.join(__dirname, 'fixtures')},
