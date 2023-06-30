@@ -1,6 +1,6 @@
 {
   "name": "@ava/typescript",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "TypeScript provider for AVA",
   "engines": {
     "node": "^14.19 || ^16.15 || ^18 || ^20"
