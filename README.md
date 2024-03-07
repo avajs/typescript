@@ -35,9 +35,9 @@ Both keys and values of the `rewritePaths` object must end with a `/`. Paths are
 
 You can enable compilation via the `compile` property. If `false`, AVA will assume you have already compiled your project. If set to `'tsc'`, AVA will run the TypeScript compiler before running your tests. This can be inefficient when using AVA in watch mode.
 
-Output files are expected to have the `.js` extension.
+Output files are expected to have the `.js` / `.mjs` / `.cjs` extension.
 
-AVA searches your entire project for `*.js`, `*.cjs`, `*.mjs`, `*.ts`, `*.cts` and `*.mts` files (or other extensions you've configured). It will ignore such files found in the `rewritePaths` targets (e.g. `build/`). If you use more specific paths, for instance `build/main/`, you may need to change AVA's `files` configuration to ignore other directories.
+AVA will now treat `*.ts`, `*.cts` and `*.mts` files as tests (but really it's running the compiled javascript). It will ignore found in the `rewritePaths` targets (e.g. `build/`). If you use more specific paths, for instance `build/main/`, you may need to change AVA's `files` [configuration](https://github.com/avajs/ava/blob/main/docs/06-configuration.md#configuration) to ignore other directories.
 
 ## ES Modules
 
