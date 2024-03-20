@@ -3,7 +3,7 @@
   "version": "4.1.0",
   "description": "TypeScript provider for AVA",
   "engines": {
-    "node": "^14.19 || ^16.15 || ^18 || ^20"
+    "node": "^14.19 || ^16.15 || ^18 || ^20 || ^21"
   },
   "files": [
     "index.js"
