@@ -13,13 +13,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [^14.19, ^16.15, ^18, ^20]
+        node-version: [^14.19, ^16.15, ^18, ^20, ^22]
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - if: runner.os == 'Windows' && matrix.node-version == '^22'
+        shell: bash
+        run: |
+          npm install -g npm
       - name: Install npm@8 for Node.js 14
         if: matrix.node-version == '^14.19'
         run: npm install --global npm@^8
