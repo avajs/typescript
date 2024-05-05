@@ -4,13 +4,13 @@ import {fileURLToPath} from 'node:url';
 import test from 'ava';
 import createProviderMacro from './_with-provider.js';
 
-const projectDir = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
+const projectDirectory = path.dirname(fileURLToPath(import.meta.url));
+const package_ = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
 const withProvider = createProviderMacro('ava-6', '5.3.0');
 
 const validateConfig = (t, provider, config) => {
 	const error = t.throws(() => provider.main({config}));
-	error.message = error.message.replace(`v${pkg.version}`, 'v${pkg.version}'); // eslint-disable-line no-template-curly-in-string
+	error.message = error.message.replace(`v${package_.version}`, 'v${pkg.version}'); // eslint-disable-line no-template-curly-in-string
 	t.snapshot(error);
 };
 
@@ -77,64 +77,64 @@ test('main() updateGlobs()', withProvider, (t, provider) => {
 
 test('main() interpretChange() without compilation', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.interpretChange(path.join(projectDir, 'src/foo.ts')), main.changeInterpretations.waitForOutOfBandCompilation);
-	t.is(main.interpretChange(path.join(projectDir, 'build/foo.js')), main.changeInterpretations.unspecified);
-	t.is(main.interpretChange(path.join(projectDir, 'src/foo.txt')), main.changeInterpretations.unspecified);
+	t.is(main.interpretChange(path.join(projectDirectory, 'src/foo.ts')), main.changeInterpretations.waitForOutOfBandCompilation);
+	t.is(main.interpretChange(path.join(projectDirectory, 'build/foo.js')), main.changeInterpretations.unspecified);
+	t.is(main.interpretChange(path.join(projectDirectory, 'src/foo.txt')), main.changeInterpretations.unspecified);
 });
 
 test('main() interpretChange() with compilation', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: 'tsc'}});
-	t.is(main.interpretChange(path.join(projectDir, 'src/foo.ts')), main.changeInterpretations.unspecified);
-	t.is(main.interpretChange(path.join(projectDir, 'build/foo.js')), main.changeInterpretations.ignoreCompiled);
-	t.is(main.interpretChange(path.join(projectDir, 'src/foo.txt')), main.changeInterpretations.unspecified);
+	t.is(main.interpretChange(path.join(projectDirectory, 'src/foo.ts')), main.changeInterpretations.unspecified);
+	t.is(main.interpretChange(path.join(projectDirectory, 'build/foo.js')), main.changeInterpretations.ignoreCompiled);
+	t.is(main.interpretChange(path.join(projectDirectory, 'src/foo.txt')), main.changeInterpretations.unspecified);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() with compilation', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: 'tsc'}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.js')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.js')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() unknown extension', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.bar')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.bar')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() not a build path', withProvider, (t, provider) => {
 	const main = provider.main({config: {rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'lib/foo.js')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'lib/foo.js')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .cjs but .cts not configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['ts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.cjs')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.cjs')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .mjs but .mts not configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['ts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.mjs')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.mjs')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .js but .ts not configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['cts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.js')), null);
+	t.is(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.js')), null);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .cjs and .cjs and .cts configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['cjs', 'cts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.cjs')), [path.join(projectDir, 'src/foo.cjs'), path.join(projectDir, 'src/foo.cts')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.cjs')), [path.join(projectDirectory, 'src/foo.cjs'), path.join(projectDirectory, 'src/foo.cts')]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .mjs and .mjs and .mts configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['mjs', 'mts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.mjs')), [path.join(projectDir, 'src/foo.mjs'), path.join(projectDir, 'src/foo.mts')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.mjs')), [path.join(projectDirectory, 'src/foo.mjs'), path.join(projectDirectory, 'src/foo.mts')]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .js and .js, .ts and .tsx configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['js', 'ts', 'tsx'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'build/foo.js')), [path.join(projectDir, 'src/foo.js'), path.join(projectDir, 'src/foo.ts'), path.join(projectDir, 'src/foo.tsx')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.js')), [path.join(projectDirectory, 'src/foo.js'), path.join(projectDirectory, 'src/foo.ts'), path.join(projectDirectory, 'src/foo.tsx')]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() returns the first possible path that exists', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['js', 'ts', 'tsx'], rewritePaths: {'fixtures/load/': 'fixtures/load/compiled/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDir, 'fixtures/load/compiled/index.js')), [path.join(projectDir, 'fixtures/load/index.ts')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'fixtures/load/compiled/index.js')), [path.join(projectDirectory, 'fixtures/load/index.ts')]);
 });

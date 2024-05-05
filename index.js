@@ -4,8 +4,8 @@ import {pathToFileURL} from 'node:url';
 import escapeStringRegexp from 'escape-string-regexp';
 import {execa} from 'execa';
 
-const pkg = JSON.parse(fs.readFileSync(new URL('package.json', import.meta.url)));
-const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
+const package_ = JSON.parse(fs.readFileSync(new URL('package.json', import.meta.url)));
+const help = `See https://github.com/avajs/typescript/blob/v${package_.version}/README.md`;
 
 function isPlainObject(x) {
 	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
@@ -36,8 +36,8 @@ function validate(target, properties) {
 	}
 }
 
-async function compileTypeScript(projectDir) {
-	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDir});
+async function compileTypeScript(projectDirectory) {
+	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDirectory});
 }
 
 const configProperties = {
@@ -62,7 +62,7 @@ const configProperties = {
 		isValid(extensions) {
 			return Array.isArray(extensions)
 				&& extensions.length > 0
-				&& extensions.every(ext => typeof ext === 'string' && ext !== '')
+				&& extensions.every(extension => typeof extension === 'string' && extension !== '')
 				&& new Set(extensions).size === extensions.length;
 		},
 	},
@@ -75,7 +75,7 @@ const changeInterpretations = Object.freeze(Object.assign(Object.create(null), {
 }));
 
 export default function typescriptProvider({negotiateProtocol}) {
-	const protocol = negotiateProtocol(['ava-6'], {version: pkg.version});
+	const protocol = negotiateProtocol(['ava-6'], {version: package_.version});
 	if (protocol === null) {
 		return;
 	}
@@ -98,7 +98,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 				path.join(protocol.projectDir, from),
 				path.join(protocol.projectDir, to),
 			]);
-			const testFileExtension = new RegExp(`\\.(${extensions.map(ext => escapeStringRegexp(ext)).join('|')})$`);
+			const testFileExtension = new RegExp(`\\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`);
 
 			const watchMode = {
 				changeInterpretations,
@@ -245,21 +245,21 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 		worker({extensionsToLoadAsModules, state: {extensions, rewritePaths}}) {
 			const importJs = extensionsToLoadAsModules.includes('js');
-			const testFileExtension = new RegExp(`\\.(${extensions.map(ext => escapeStringRegexp(ext)).join('|')})$`);
+			const testFileExtension = new RegExp(`\\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`);
 
 			return {
-				canLoad(ref) {
-					return testFileExtension.test(ref) && rewritePaths.some(([from]) => ref.startsWith(from));
+				canLoad(reference) {
+					return testFileExtension.test(reference) && rewritePaths.some(([from]) => reference.startsWith(from));
 				},
 
-				async load(ref, {requireFn}) {
-					const [from, to] = rewritePaths.find(([from]) => ref.startsWith(from));
-					let rewritten = `${to}${ref.slice(from.length)}`;
+				async load(reference, {requireFn}) {
+					const [from, to] = rewritePaths.find(([from]) => reference.startsWith(from));
+					let rewritten = `${to}${reference.slice(from.length)}`;
 					let useImport = true;
-					if (ref.endsWith('.cts')) {
+					if (reference.endsWith('.cts')) {
 						rewritten = rewritten.replace(/\.cts$/, '.cjs');
 						useImport = false;
-					} else if (ref.endsWith('.mts')) {
+					} else if (reference.endsWith('.mts')) {
 						rewritten = rewritten.replace(/\.mts$/, '.mjs');
 					} else {
 						rewritten = rewritten.replace(testFileExtension, '.js');

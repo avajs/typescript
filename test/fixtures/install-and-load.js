@@ -18,8 +18,8 @@ const worker = provider.worker({
 	...JSON.parse(process.argv[2]),
 });
 
-const ref = path.resolve(process.argv[3]);
+const reference = path.resolve(process.argv[3]);
 
-if (worker.canLoad(ref)) {
-	worker.load(ref, {requireFn: createRequire(import.meta.url)});
+if (worker.canLoad(reference)) {
+	worker.load(reference, {requireFn: createRequire(import.meta.url)});
 }
