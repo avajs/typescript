@@ -4,20 +4,20 @@ import {fileURLToPath} from 'node:url';
 import makeProvider from '@ava/typescript';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
+const package_ = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
 
-const createProviderMacro = (identifier, avaVersion, projectDir = __dirname) => (t, run) => run(t, makeProvider({
+const createProviderMacro = (identifier, avaVersion, projectDirectory = __dirname) => (t, run) => run(t, makeProvider({
 	negotiateProtocol(identifiers, {version}) {
 		t.true(identifiers.includes(identifier));
-		t.is(version, pkg.version);
+		t.is(version, package_.version);
 		return {
 			ava: {avaVersion},
 			identifier,
 			normalizeGlobPatterns: patterns => patterns,
 			async findFiles({patterns}) {
-				return patterns.map(file => path.join(projectDir, file));
+				return patterns.map(file => path.join(projectDirectory, file));
 			},
-			projectDir,
+			projectDir: projectDirectory,
 		};
 	},
 }));
