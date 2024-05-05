@@ -16,13 +16,13 @@ jobs:
         node-version: [^18.18, ^20.8, ^21]
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install --no-audit
       - run: npm test
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v4
         with:
           files: coverage/lcov.info
           name: ${{ matrix.os }}/${{ matrix.node-version }}
