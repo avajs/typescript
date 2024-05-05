@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const provider = makeProvider({
 	negotiateProtocol() {
-		return {identifier: 'ava-3.2', ava: {version: '3.15.0'}, projectDir: __dirname};
+		return {identifier: 'ava-6', ava: {version: '6.0.0'}, projectDir: __dirname};
 	},
 });
 

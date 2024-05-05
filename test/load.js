@@ -5,7 +5,7 @@ import {execaNode} from 'execa';
 import createProviderMacro from './_with-provider.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const withProvider = createProviderMacro('ava-3.2', '3.2.0', path.join(__dirname, 'fixtures'));
+const withProvider = createProviderMacro('ava-6', '6.0.0', path.join(__dirname, 'fixtures'));
 
 const setup = async provider => ({
 	state: await provider.main({
