@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "escape-string-regexp": "^5.0.0",
-    "execa": "^8.0.1"
+    "execa": "^9.6.0"
   },
   "devDependencies": {
     "ava": "^6.4.0",

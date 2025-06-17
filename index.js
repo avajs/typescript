@@ -37,7 +37,7 @@ function validate(target, properties) {
 }
 
 async function compileTypeScript(projectDirectory) {
-	return execa('tsc', ['--incremental'], {preferLocal: true, cwd: projectDirectory});
+	return execa({preferLocal: true, cwd: projectDirectory})`tsc --incremental`;
 }
 
 const configProperties = {
