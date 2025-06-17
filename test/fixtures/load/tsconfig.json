@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"strictNullChecks": true,
-		"module": "Node16",
+		"module": "node18",
 		"outDir": "compiled"
 	},
 	"include": [
