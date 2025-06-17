@@ -32,24 +32,5 @@
     "del": "^8.0.0",
     "typescript": "^5.8.3",
     "xo": "^1.1.0"
-  },
-  "c8": {
-    "reporter": [
-      "html",
-      "lcov",
-      "text"
-    ]
-  },
-  "ava": {
-    "files": [
-      "!test/broken-fixtures/**"
-    ],
-    "watcher": {
-      "ignoreChanges": [
-        "test/fixtures/**",
-        "test/broken-fixtures/**"
-      ]
-    },
-    "timeout": "60s"
   }
 }
