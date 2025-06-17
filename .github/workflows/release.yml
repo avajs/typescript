@@ -70,7 +70,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          cache: npm
           registry-url: https://registry.npmjs.org
 
       - name: Publish to npm with provenance
