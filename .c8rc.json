@@ -1,0 +1,9 @@
+{
+	"all": true,
+	"include": "index.js",
+	"reporter": [
+		"html",
+		"lcov",
+		"text"
+	]
+}

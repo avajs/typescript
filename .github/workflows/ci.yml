@@ -3,9 +3,14 @@ on:
   push:
     branches:
     - main
+    tags:
+    - 'v*'
   pull_request:
     paths-ignore:
     - '*.md'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   nodejs:
     name: Node.js
@@ -13,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [^18.18, ^20.8, ^21, ^22, ^24]
+        node-version: [^20.8, ^22, ^24]
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
@@ -26,3 +31,4 @@ jobs:
         with:
           files: coverage/lcov.info
           name: ${{ matrix.os }}/${{ matrix.node-version }}
+          token: ${{ secrets.CODECOV_TOKEN }}

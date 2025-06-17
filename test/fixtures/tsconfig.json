@@ -1,6 +1,10 @@
 {
 	"compilerOptions": {
 		"strictNullChecks": true,
+		"lib": [
+			"es2022",
+			"dom"
+		],
 		"outDir": "typescript/compiled"
 	},
 	"include": [

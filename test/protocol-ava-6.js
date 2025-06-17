@@ -121,17 +121,27 @@ test('main() resolvePossibleOutOfBandCompilationSources() .js but .ts not config
 
 test('main() resolvePossibleOutOfBandCompilationSources() .cjs and .cjs and .cts configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['cjs', 'cts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.cjs')), [path.join(projectDirectory, 'src/foo.cjs'), path.join(projectDirectory, 'src/foo.cts')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.cjs')), [
+		path.join(projectDirectory, 'src/foo.cjs'),
+		path.join(projectDirectory, 'src/foo.cts'),
+	]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .mjs and .mjs and .mts configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['mjs', 'mts'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.mjs')), [path.join(projectDirectory, 'src/foo.mjs'), path.join(projectDirectory, 'src/foo.mts')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.mjs')), [
+		path.join(projectDirectory, 'src/foo.mjs'),
+		path.join(projectDirectory, 'src/foo.mts'),
+	]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() .js and .js, .ts and .tsx configured', withProvider, (t, provider) => {
 	const main = provider.main({config: {extensions: ['js', 'ts', 'tsx'], rewritePaths: {'src/': 'build/'}, compile: false}});
-	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.js')), [path.join(projectDirectory, 'src/foo.js'), path.join(projectDirectory, 'src/foo.ts'), path.join(projectDirectory, 'src/foo.tsx')]);
+	t.deepEqual(main.resolvePossibleOutOfBandCompilationSources(path.join(projectDirectory, 'build/foo.js')), [
+		path.join(projectDirectory, 'src/foo.js'),
+		path.join(projectDirectory, 'src/foo.ts'),
+		path.join(projectDirectory, 'src/foo.tsx'),
+	]);
 });
 
 test('main() resolvePossibleOutOfBandCompilationSources() returns the first possible path that exists', withProvider, (t, provider) => {

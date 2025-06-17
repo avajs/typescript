@@ -1,0 +1,89 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v1.2.3)'
+        required: true
+        type: string
+      skip_ci_check:
+        description: 'Skip CI status check'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Verify tag matches package.json version
+        run: |
+          jq --raw-output --exit-status --arg tag "$RELEASE_TAG" '
+            if (.version == ($tag | ltrimstr("v"))) then
+              "Package version (\(.version)) matches tag version (\($tag | ltrimstr("v")))"
+            else
+              "Package version (\(.version)) does not match tag version (\($tag | ltrimstr("v")))" | halt_error(1)
+            end' package.json
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+      - name: Verify commit is in main branch
+        run: |
+          # Check if the tagged commit is included in the main branch
+          if git merge-base --is-ancestor ${{ github.sha }} origin/main; then
+            echo "Tagged commit is properly included in main branch"
+          else
+            echo "Tagged commit is not included in the main branch"
+            echo "Please push the commit to main before releasing"
+            exit 1
+          fi
+
+      - name: Check CI status
+        if: ${{ !inputs.skip_ci_check }}
+        run: |
+          # Check if CI has completed successfully for this commit
+          gh run list --commit ${{ github.sha }} --status success --json workflowName | jq --raw-output --exit-status '
+            if any(.[]; .workflowName == "Install and test @ava/typescript") then
+              "All CI checks have passed!"
+            else
+              "CI has not completed successfully for this commit" | halt_error(1)
+            end'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm with provenance
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --title "$RELEASE_TAG" \
+            --draft \
+            --generate-notes
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
