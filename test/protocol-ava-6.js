@@ -1,10 +1,9 @@
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
 import test from 'ava';
 import pkg from '../package.json' with {type: 'json'};
 import createProviderMacro from './_with-provider.js';
 
-const projectDirectory = path.dirname(fileURLToPath(import.meta.url));
+const projectDirectory = import.meta.dirname;
 const withProvider = createProviderMacro('ava-6', '5.3.0');
 
 const validateConfig = (t, provider, config) => {

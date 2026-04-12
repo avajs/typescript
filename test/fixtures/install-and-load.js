@@ -1,14 +1,11 @@
 import {createRequire} from 'node:module';
 import path from 'node:path';
 import process from 'node:process';
-import {fileURLToPath} from 'node:url';
 import makeProvider from '@ava/typescript';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const provider = makeProvider({
 	negotiateProtocol() {
-		return {identifier: 'ava-6', ava: {version: '6.0.0'}, projectDir: __dirname};
+		return {identifier: 'ava-6', ava: {version: '6.0.0'}, projectDir: import.meta.dirname};
 	},
 });
 
