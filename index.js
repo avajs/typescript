@@ -74,11 +74,16 @@ const changeInterpretations = Object.freeze(Object.assign(Object.create(null), {
 	waitForOutOfBandCompilation: 2,
 }));
 
+const defaultExtensions = ['ts', 'mts'];
+const defaultAva6Extensions = ['ts', 'cts', 'mts'];
+
 export default function typescriptProvider({negotiateProtocol}) {
 	const protocol = negotiateProtocol(['ava-6', 'ava-8'], {version: pkg.version});
 	if (protocol === null) {
 		return;
 	}
+
+	const isAva8 = protocol.identifier === 'ava-8';
 
 	return {
 		main({config}) {
@@ -89,7 +94,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 			validate(config, configProperties);
 
 			const {
-				extensions = ['ts', 'cts', 'mts'],
+				extensions = isAva8 ? defaultExtensions : defaultAva6Extensions,
 				rewritePaths: relativeRewritePaths,
 				compile,
 			} = config;
@@ -244,7 +249,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 		},
 
 		worker({extensionsToLoadAsModules, state: {extensions, rewritePaths}}) {
-			const importJs = extensionsToLoadAsModules.includes('js');
+			const importJs = isAva8 || extensionsToLoadAsModules.includes('js');
 			const testFileExtension = new RegExp(String.raw`\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`, 'v');
 
 			return {
@@ -252,13 +257,13 @@ export default function typescriptProvider({negotiateProtocol}) {
 					return testFileExtension.test(reference) && rewritePaths.some(([from]) => reference.startsWith(from));
 				},
 
-				async load(reference, {requireFn}) {
+				async load(reference, {requireFn} = {}) {
 					const [from, to] = rewritePaths.find(([from]) => reference.startsWith(from));
 					let rewritten = `${to}${reference.slice(from.length)}`;
 					let useImport = true;
 					if (reference.endsWith('.cts')) {
 						rewritten = rewritten.replace(/\.cts$/v, '.cjs');
-						useImport = false;
+						useImport = isAva8;
 					} else if (reference.endsWith('.mts')) {
 						rewritten = rewritten.replace(/\.mts$/v, '.mjs');
 					} else {

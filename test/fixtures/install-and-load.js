@@ -3,20 +3,26 @@ import path from 'node:path';
 import process from 'node:process';
 import makeProvider from '@ava/typescript';
 
+const isAva8 = process.argv[2] === 'ava-8';
+
 const provider = makeProvider({
 	negotiateProtocol() {
-		return {identifier: 'ava-6', ava: {version: '6.0.0'}, projectDir: import.meta.dirname};
+		return {identifier: isAva8 ? 'ava-8' : 'ava-6', ava: {version: isAva8 ? '8.0.0' : '6.0.0'}, projectDir: import.meta.dirname};
 	},
 });
 
 const worker = provider.worker({
-	extensionsToLoadAsModules: [],
+	...(!isAva8 && {extensionsToLoadAsModules: []}),
 	state: {},
-	...JSON.parse(process.argv[2]),
+	...JSON.parse(process.argv[3]),
 });
 
-const reference = path.resolve(process.argv[3]);
+const reference = path.resolve(process.argv[4]);
 
 if (worker.canLoad(reference)) {
-	worker.load(reference, {requireFn: createRequire(import.meta.url)});
+	if (isAva8) {
+		worker.load(reference);
+	} else {
+		worker.load(reference, {requireFn: createRequire(import.meta.url)});
+	}
 }
