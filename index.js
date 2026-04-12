@@ -3,9 +3,9 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import escapeStringRegexp from 'escape-string-regexp';
 import {execa} from 'execa';
+import pkg from './package.json' with {type: 'json'};
 
-const package_ = JSON.parse(fs.readFileSync(new URL('package.json', import.meta.url)));
-const help = `See https://github.com/avajs/typescript/blob/v${package_.version}/README.md`;
+const help = `See https://github.com/avajs/typescript/blob/v${pkg.version}/README.md`;
 
 function isPlainObject(x) {
 	return x !== null && typeof x === 'object' && Reflect.getPrototypeOf(x) === Object.prototype;
@@ -75,7 +75,7 @@ const changeInterpretations = Object.freeze(Object.assign(Object.create(null), {
 }));
 
 export default function typescriptProvider({negotiateProtocol}) {
-	const protocol = negotiateProtocol(['ava-6'], {version: package_.version});
+	const protocol = negotiateProtocol(['ava-6', 'ava-8'], {version: pkg.version});
 	if (protocol === null) {
 		return;
 	}
