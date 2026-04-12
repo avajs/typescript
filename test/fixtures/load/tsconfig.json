@@ -1,7 +1,5 @@
 {
 	"compilerOptions": {
-		"strictNullChecks": true,
-		"module": "node18",
 		"outDir": "compiled"
 	},
 	"include": [
