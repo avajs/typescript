@@ -98,7 +98,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 				path.join(protocol.projectDir, from),
 				path.join(protocol.projectDir, to),
 			]);
-			const testFileExtension = new RegExp(`\\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`);
+			const testFileExtension = new RegExp(String.raw`\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`, 'v');
 
 			const watchMode = {
 				changeInterpretations,
@@ -128,7 +128,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 					}
 
 					// Only recognize .cjs, .mjs and .js files.
-					if (!/\.(c|m)?js$/.test(filePath)) {
+					if (!/\.(c|m)?js$/v.test(filePath)) {
 						return null;
 					}
 
@@ -142,11 +142,11 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 						if (filePath.endsWith('.cjs')) {
 							if (extensions.includes('cjs')) {
-								possibleExtensions.push({replace: /\.cjs$/, extension: 'cjs'});
+								possibleExtensions.push({replace: /\.cjs$/v, extension: 'cjs'});
 							}
 
 							if (extensions.includes('cts')) {
-								possibleExtensions.push({replace: /\.cjs$/, extension: 'cts'});
+								possibleExtensions.push({replace: /\.cjs$/v, extension: 'cts'});
 							}
 
 							if (possibleExtensions.length === 0) {
@@ -156,11 +156,11 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 						if (filePath.endsWith('.mjs')) {
 							if (extensions.includes('mjs')) {
-								possibleExtensions.push({replace: /\.mjs$/, extension: 'mjs'});
+								possibleExtensions.push({replace: /\.mjs$/v, extension: 'mjs'});
 							}
 
 							if (extensions.includes('mts')) {
-								possibleExtensions.push({replace: /\.mjs$/, extension: 'mts'});
+								possibleExtensions.push({replace: /\.mjs$/v, extension: 'mts'});
 							}
 
 							if (possibleExtensions.length === 0) {
@@ -170,15 +170,15 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 						if (filePath.endsWith('.js')) {
 							if (extensions.includes('js')) {
-								possibleExtensions.push({replace: /\.js$/, extension: 'js'});
+								possibleExtensions.push({replace: /\.js$/v, extension: 'js'});
 							}
 
 							if (extensions.includes('ts')) {
-								possibleExtensions.push({replace: /\.js$/, extension: 'ts'});
+								possibleExtensions.push({replace: /\.js$/v, extension: 'ts'});
 							}
 
 							if (extensions.includes('tsx')) {
-								possibleExtensions.push({replace: /\.js$/, extension: 'tsx'});
+								possibleExtensions.push({replace: /\.js$/v, extension: 'tsx'});
 							}
 
 							if (possibleExtensions.length === 0) {
@@ -245,7 +245,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 		worker({extensionsToLoadAsModules, state: {extensions, rewritePaths}}) {
 			const importJs = extensionsToLoadAsModules.includes('js');
-			const testFileExtension = new RegExp(`\\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`);
+			const testFileExtension = new RegExp(String.raw`\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`, 'v');
 
 			return {
 				canLoad(reference) {
@@ -257,10 +257,10 @@ export default function typescriptProvider({negotiateProtocol}) {
 					let rewritten = `${to}${reference.slice(from.length)}`;
 					let useImport = true;
 					if (reference.endsWith('.cts')) {
-						rewritten = rewritten.replace(/\.cts$/, '.cjs');
+						rewritten = rewritten.replace(/\.cts$/v, '.cjs');
 						useImport = false;
 					} else if (reference.endsWith('.mts')) {
-						rewritten = rewritten.replace(/\.mts$/, '.mjs');
+						rewritten = rewritten.replace(/\.mts$/v, '.mjs');
 					} else {
 						rewritten = rewritten.replace(testFileExtension, '.js');
 						useImport = importJs;

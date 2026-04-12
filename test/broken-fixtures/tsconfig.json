@@ -1,9 +1,8 @@
 {
 	"compilerOptions": {
-		"outDir": "typescript/compiled",
-		"lib": [
-			"es2022"
-		]
+		"outDir": "./typescript/compiled",
+		"rootDir": "./typescript",
+		"tsBuildInfoFile": "./typescript/compiled/.tsbuildinfo"
 	},
 	"include": [
 		"typescript"
