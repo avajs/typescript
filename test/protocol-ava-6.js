@@ -1,16 +1,15 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import test from 'ava';
+import pkg from '../package.json' with {type: 'json'};
 import createProviderMacro from './_with-provider.js';
 
 const projectDirectory = path.dirname(fileURLToPath(import.meta.url));
-const package_ = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url)));
 const withProvider = createProviderMacro('ava-6', '5.3.0');
 
 const validateConfig = (t, provider, config) => {
 	const error = t.throws(() => provider.main({config}));
-	error.message = error.message.replace(`v${package_.version}`, 'v${pkg.version}'); // eslint-disable-line no-template-curly-in-string
+	error.message = error.message.replace(`v${pkg.version}`, 'v${pkg.version}'); // eslint-disable-line no-template-curly-in-string
 	t.snapshot(error);
 };
 
