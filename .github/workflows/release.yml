@@ -1,13 +1,14 @@
 name: Release
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag (e.g., v1.2.3)'
+      ref:
+        description: 'Commit ref or existing version tag (e.g., abc1234 or v1.2.3)'
         required: true
+        type: string
+      new_version:
+        description: 'New version for npm version (e.g., patch, minor, major, 1.2.3). Must be empty when providing an existing tag.'
+        required: false
         type: string
       skip_ci_check:
         description: 'Skip CI status check'
@@ -15,74 +16,182 @@ on:
         type: boolean
         default: false
 
-permissions:
-  contents: write
-  id-token: write
-
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    environment: npm
+  preflight:
+    name: Validate
+    runs-on: ubuntu-slim
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      ref_is_tag: ${{steps.validation.outputs.ref_is_tag}}
     steps:
+      - name: Validate inputs
+        id: validation
+        env:
+          REF: ${{inputs.ref}}
+          NEW_VERSION: ${{inputs.new_version}}
+        run: |
+          if [[ "$REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "ref_is_tag=true" >> "$GITHUB_OUTPUT"
+            if [[ -n "$NEW_VERSION" ]]; then
+              echo "::error::new_version must be empty when an existing tag is provided"
+              exit 1
+            fi
+          else
+            echo "ref_is_tag=false" >> "$GITHUB_OUTPUT"
+            if [[ -z "$NEW_VERSION" ]]; then
+              echo "::error::new_version is required when a commit ref is provided"
+              exit 1
+            fi
+          fi
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          ref: ${{inputs.ref}}
           fetch-depth: 0
 
-      - name: Verify tag matches package.json version
-        run: |
-          jq --raw-output --exit-status --arg tag "$RELEASE_TAG" '
-            if (.version == ($tag | ltrimstr("v"))) then
-              "Package version (\(.version)) matches tag version (\($tag | ltrimstr("v")))"
-            else
-              "Package version (\(.version)) does not match tag version (\($tag | ltrimstr("v")))" | halt_error(1)
-            end' package.json
+      - name: Verify ref is HEAD of main
+        if: steps.validation.outputs.ref_is_tag == 'false'
         env:
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-
-      - name: Verify commit is in main branch
+          REF: ${{inputs.ref}}
         run: |
-          # Check if the tagged commit is included in the main branch
-          if git merge-base --is-ancestor ${{ github.sha }} origin/main; then
-            echo "Tagged commit is properly included in main branch"
-          else
-            echo "Tagged commit is not included in the main branch"
-            echo "Please push the commit to main before releasing"
+          MAIN_SHA=$(git rev-parse origin/main)
+          CURRENT_SHA=$(git rev-parse HEAD)
+          if [[ "$CURRENT_SHA" != "$MAIN_SHA" ]]; then
+            echo "::error::ref ${REF} (${CURRENT_SHA}) is not the HEAD of main (${MAIN_SHA})"
             exit 1
           fi
 
-      - name: Check CI status
-        if: ${{ !inputs.skip_ci_check }}
-        run: |
-          # Check if CI has completed successfully for this commit
-          gh run list --commit ${{ github.sha }} --status success --json workflowName | jq --raw-output --exit-status '
-            if any(.[]; .workflowName == "Install and test @ava/typescript") then
-              "All CI checks have passed!"
-            else
-              "CI has not completed successfully for this commit" | halt_error(1)
-            end'
+      - name: Verify tag matches package.json version
+        if: steps.validation.outputs.ref_is_tag == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{inputs.ref}}
+        run: |
+          jq --raw-output --exit-status --arg tag "$REF" '
+            if (.version == ($tag | ltrimstr("v"))) then
+              "Package version (\(.version)) matches tag version (\($tag | ltrimstr(\"v\")))"
+            else
+              "Package version (\(.version)) does not match tag version (\($tag | ltrimstr(\"v\")))" | halt_error(1)
+            end' package.json
+
+      - name: Check CI status
+        if: '!inputs.skip_ci_check'
+        run: |
+          gh run list --commit "$(git rev-parse HEAD)" --workflow ci.yml --status success --json databaseId \
+            | jq --raw-output --exit-status '
+                if (length > 0) then
+                  "CI checks have passed"
+                else
+                  "CI has not completed successfully for this commit" | halt_error(1)
+                end'
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: preflight
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{inputs.ref}}
+          fetch-depth: 0
+
+      - name: Verify ref is still HEAD of main
+        if: needs.preflight.outputs.ref_is_tag == 'false'
+        env:
+          REF: ${{inputs.ref}}
+        run: |
+          MAIN_SHA=$(git rev-parse origin/main)
+          CURRENT_SHA=$(git rev-parse HEAD)
+          if [[ "$CURRENT_SHA" != "$MAIN_SHA" ]]; then
+            echo "::error::ref ${REF} (${CURRENT_SHA}) is no longer the HEAD of main (${MAIN_SHA})"
+            exit 1
+          fi
+
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{vars.LAUNCHBOT_ID}}
+          private-key: ${{secrets.LAUNCHBOT_PRIVATE_KEY}}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: package.json
+          cache: npm
           registry-url: https://registry.npmjs.org
+
+      - name: Bump version
+        if: needs.preflight.outputs.ref_is_tag == 'false'
+        env:
+          NEW_VERSION: ${{inputs.new_version}}
+        run: npm version "$NEW_VERSION" --no-git-tag-version
+
+      - name: Push version commit
+        if: needs.preflight.outputs.ref_is_tag == 'false'
+        id: push-commit
+        env:
+          GH_TOKEN: ${{steps.app-token.outputs.token}}
+        run: |
+          RELEASE_TAG="v$(jq --raw-output .version package.json)"
+          PARENT_SHA=$(git rev-parse HEAD)
+
+          jq --null-input \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg parentSha "$PARENT_SHA" \
+            --arg headline "$RELEASE_TAG" \
+            --rawfile pkgContent package.json \
+            --rawfile lockContent package-lock.json \
+            '{
+              query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid } } }",
+              variables: {
+                input: {
+                  branch: { repositoryNameWithOwner: $repo, branchName: "main" },
+                  message: { headline: $headline },
+                  expectedHeadOid: $parentSha,
+                  fileChanges: {
+                    additions: [
+                      { path: "package.json", contents: ($pkgContent | @base64) },
+                      { path: "package-lock.json", contents: ($lockContent | @base64) }
+                    ]
+                  }
+                }
+              }
+            }' > /tmp/request.json
+
+          COMMIT_SHA=$(gh api graphql --input /tmp/request.json \
+            --jq '.data.createCommitOnBranch.commit.oid')
+
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "version_commit_sha=$COMMIT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create version tag
+        if: needs.preflight.outputs.ref_is_tag == 'false'
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/${{steps.push-commit.outputs.release_tag}}" \
+            -f sha="${{steps.push-commit.outputs.version_commit_sha}}"
+        env:
+          GH_TOKEN: ${{steps.app-token.outputs.token}}
 
       - name: Publish to npm with provenance
         run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         run: |
+          RELEASE_TAG="v$(jq --raw-output .version package.json)"
           gh release create "$RELEASE_TAG" \
             --title "$RELEASE_TAG" \
             --draft \
             --generate-notes
         env:
-          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{steps.app-token.outputs.token}}
