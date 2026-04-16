@@ -150,7 +150,6 @@ jobs:
             --arg parentSha "$PARENT_SHA" \
             --arg headline "$RELEASE_TAG" \
             --rawfile pkgContent package.json \
-            --rawfile lockContent package-lock.json \
             '{
               query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid } } }",
               variables: {
@@ -160,8 +159,7 @@ jobs:
                   expectedHeadOid: $parentSha,
                   fileChanges: {
                     additions: [
-                      { path: "package.json", contents: ($pkgContent | @base64) },
-                      { path: "package-lock.json", contents: ($lockContent | @base64) }
+                      { path: "package.json", contents: ($pkgContent | @base64) }
                     ]
                   }
                 }
