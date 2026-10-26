@@ -35,6 +35,8 @@ Then, enable TypeScript support either in `package.json` or `ava.config.*`:
 
 Both keys and values of the `rewritePaths` object must end with a `/`. Paths are relative to your project directory.
 
+When source paths overlap, the most specific source path is used to resolve the compiled file, regardless of the order of the mappings.
+
 You can enable compilation via the `compile` property. If `false`, AVA will assume you have already compiled your project. If set to `'tsc'`, AVA will run the TypeScript compiler before running your tests. This can be inefficient when using AVA in watch mode.
 
 Output files are expected to have the `.js` extension.
@@ -48,6 +50,10 @@ AVA searches your entire project for `*.js`, `*.mjs`, `*.ts` and `*.mts` filesï¹
 With AVA 6 and 7, if your `package.json` has configured `"type": "module"`, or you've configured AVA to treat the `js` extension as `module`, then `@ava/typescript` will import the output file as an ES module. Note that this is based on the _output file_, not the `ts` extension.
 
 AVA 8 will _always_ import all files as ES modules.
+
+## Selecting tests by line number
+
+With a compatible version of AVA, you can select tests using the original TypeScript line numbers, for example `npx ava src/test.ts:14`. Enable `sourceMap` in your TypeScript compiler options so AVA can map the compiled JavaScript back to the source lines.
 
 ## Add additional extensions
 

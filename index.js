@@ -40,6 +40,23 @@ async function compileTypeScript(projectDirectory) {
 	return execa({preferLocal: true, cwd: projectDirectory})`tsc --incremental`;
 }
 
+function rewritePath(reference, rewritePaths) {
+	let selected;
+	for (const rewrite of rewritePaths) {
+		const [from] = rewrite;
+		if (reference.startsWith(from) && (selected === undefined || from.length > selected[0].length)) {
+			selected = rewrite;
+		}
+	}
+
+	if (selected === undefined) {
+		return null;
+	}
+
+	const [from, to] = selected;
+	return `${to}${reference.slice(from.length)}`;
+}
+
 const configProperties = {
 	compile: {
 		required: true,
@@ -78,12 +95,12 @@ const defaultExtensions = ['ts', 'mts'];
 const defaultAva6Extensions = ['ts', 'cts', 'mts'];
 
 export default function typescriptProvider({negotiateProtocol}) {
-	const protocol = negotiateProtocol(['ava-6', 'ava-8'], {version: pkg.version});
+	const protocol = negotiateProtocol(['ava-9', 'ava-8', 'ava-6'], {version: pkg.version});
 	if (protocol === null) {
 		return;
 	}
 
-	const isAva8 = protocol.identifier === 'ava-8';
+	const isLegacyProtocol = protocol.identifier === 'ava-6';
 
 	return {
 		main({config}) {
@@ -94,7 +111,7 @@ export default function typescriptProvider({negotiateProtocol}) {
 			validate(config, configProperties);
 
 			const {
-				extensions = isAva8 ? defaultExtensions : defaultAva6Extensions,
+				extensions = isLegacyProtocol ? defaultAva6Extensions : defaultExtensions,
 				rewritePaths: relativeRewritePaths,
 				compile,
 			} = config;
@@ -137,12 +154,18 @@ export default function typescriptProvider({negotiateProtocol}) {
 						return null;
 					}
 
+					const possibleDeletedFiles = new Set();
 					for (const [from, to] of rewritePaths) {
 						if (!filePath.startsWith(to)) {
 							continue;
 						}
 
 						const rewritten = `${from}${filePath.slice(to.length)}`;
+						// A more specific source mapping may send this candidate elsewhere.
+						if (rewritePath(rewritten, rewritePaths) !== filePath) {
+							continue;
+						}
+
 						const possibleExtensions = [];
 
 						if (filePath.endsWith('.cjs')) {
@@ -153,10 +176,6 @@ export default function typescriptProvider({negotiateProtocol}) {
 							if (extensions.includes('cts')) {
 								possibleExtensions.push({replace: /\.cjs$/v, extension: 'cts'});
 							}
-
-							if (possibleExtensions.length === 0) {
-								return null;
-							}
 						}
 
 						if (filePath.endsWith('.mjs')) {
@@ -166,10 +185,6 @@ export default function typescriptProvider({negotiateProtocol}) {
 
 							if (extensions.includes('mts')) {
 								possibleExtensions.push({replace: /\.mjs$/v, extension: 'mts'});
-							}
-
-							if (possibleExtensions.length === 0) {
-								return null;
 							}
 						}
 
@@ -185,13 +200,12 @@ export default function typescriptProvider({negotiateProtocol}) {
 							if (extensions.includes('tsx')) {
 								possibleExtensions.push({replace: /\.js$/v, extension: 'tsx'});
 							}
-
-							if (possibleExtensions.length === 0) {
-								return null;
-							}
 						}
 
-						const possibleDeletedFiles = [];
+						if (possibleExtensions.length === 0) {
+							return null;
+						}
+
 						for (const {replace, extension} of possibleExtensions) {
 							const possibleFilePath = rewritten.replace(replace, `.${extension}`);
 
@@ -200,13 +214,11 @@ export default function typescriptProvider({negotiateProtocol}) {
 								return [possibleFilePath];
 							}
 
-							possibleDeletedFiles.push(possibleFilePath);
+							possibleDeletedFiles.add(possibleFilePath);
 						}
-
-						return possibleDeletedFiles;
 					}
 
-					return null;
+					return possibleDeletedFiles.size > 0 ? [...possibleDeletedFiles] : null;
 				},
 			};
 
@@ -249,25 +261,34 @@ export default function typescriptProvider({negotiateProtocol}) {
 		},
 
 		worker({extensionsToLoadAsModules, state: {extensions, rewritePaths}}) {
-			const importJs = isAva8 || extensionsToLoadAsModules.includes('js');
+			const importJs = !isLegacyProtocol || extensionsToLoadAsModules.includes('js');
 			const testFileExtension = new RegExp(String.raw`\.(${extensions.map(extension => escapeStringRegexp(extension)).join('|')})$`, 'v');
+			const resolveFile = reference => {
+				const rewritten = rewritePath(reference, rewritePaths);
+				if (reference.endsWith('.cts')) {
+					return rewritten.replace(/\.cts$/v, '.cjs');
+				}
+
+				if (reference.endsWith('.mts')) {
+					return rewritten.replace(/\.mts$/v, '.mjs');
+				}
+
+				return rewritten.replace(testFileExtension, '.js');
+			};
 
 			return {
+				...(protocol.identifier === 'ava-9' && {resolveFile}),
+
 				canLoad(reference) {
 					return testFileExtension.test(reference) && rewritePaths.some(([from]) => reference.startsWith(from));
 				},
 
 				async load(reference, {requireFn} = {}) {
-					const [from, to] = rewritePaths.find(([from]) => reference.startsWith(from));
-					let rewritten = `${to}${reference.slice(from.length)}`;
+					const rewritten = resolveFile(reference);
 					let useImport = true;
 					if (reference.endsWith('.cts')) {
-						rewritten = rewritten.replace(/\.cts$/v, '.cjs');
-						useImport = isAva8;
-					} else if (reference.endsWith('.mts')) {
-						rewritten = rewritten.replace(/\.mts$/v, '.mjs');
-					} else {
-						rewritten = rewritten.replace(testFileExtension, '.js');
+						useImport = !isLegacyProtocol;
+					} else if (!reference.endsWith('.mts')) {
 						useImport = importJs;
 					}
 
